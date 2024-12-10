@@ -1,0 +1,6 @@
+    1  nano internet.yml 
+    2  ansible-navigator run -m stdout internet.yml --syntax-check
+    3  ansible-navigator run -m stdout internet.yml
+    4  lab grade playbook-review
+    5  history 
+    6  history > history.txt

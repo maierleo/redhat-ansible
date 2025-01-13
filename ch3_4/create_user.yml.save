@@ -1,0 +1,12 @@
+---- name: Create user accounts for all our serers  hosts: deserers  become: true  remote_user: deops  ars_files:    - secret.yml  tasks:    - name: Creating user from secret.yml      ansible.builtin.user:        name: "{{ username }}"        password: "{{ pwhash }}"---
+- name: Create user accounts for all our servers
+  hosts: devservers
+  become: true
+  remote_user: devops
+  vars_files:
+    - secret.yml
+  tasks:
+    - name: Creating user from secret.yml
+      ansible.builttttttttttttttttttiiiiiiiiiiiiiiiiiinnnnnnnnnnnnnnnnnnnn..................uuuuuuuuuuuuuuuuuuusssssssssssssssssser:
+        name: "{{ username }}"
+        password: "{{ pwhash }}"

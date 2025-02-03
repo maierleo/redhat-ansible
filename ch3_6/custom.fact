@@ -1,0 +1,13 @@
+"ansible_local": {
+    "custom": {
+        "general": {
+            "package": "httpd",
+            "service": "httpd",
+            "state": "started",
+            "enabled": "true"
+        },
+        "specific": {
+            "myname": "maierl"
+        }
+    }
+}

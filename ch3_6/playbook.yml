@@ -16,3 +16,7 @@
         name: "{{ custom['service'] }}"
         state: "{{ custom['state'] }}"
         enabled: "{{ custom['enabled'] }}"
+
+    - name: Display my name
+      ansible.builtin.debug:
+        msg: "My name is set to: '{{ ansible_facts['ansible_local']['custom']['specific']['myname'] }}'"

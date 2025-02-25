@@ -1,0 +1,84 @@
+---
+- name: Playbook Control Lab
+  hosts: webservers
+  vars_files: vars.yml
+  gather_facts: yes  # Ensure facts are gathered
+  
+  tasks:
+    # Fail fast message
+    - name: Fail fast if system does not meet requirements
+      ansible.builtin.fail:
+        msg: "System does not meet the minimum requirements: 256MB of RAM and RHEL."
+      when:
+        - ansible_facts['memtotal_mb'] < min_ram_mb
+        - ansible_facts['distribution'] != 'RedHat'
+
+    # Install all packages
+    - name: Ensure required packages are present
+      ansible.builtin.yum:
+        name: "{{ item }}"
+        state: latest
+      with_items: "{{ packages }}"
+      become: true
+      when: ansible_facts['distribution'] == 'RedHat'
+
+    # Enable and start services
+    - name: Ensure services are enabled and started
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      with_items: "{{ services }}"
+      become: true
+      when: ansible_facts['distribution'] == 'RedHat'
+
+    # Block of config tasks
+    - name: Block of config tasks
+      block:
+        - name: Ensure the SSL certificate directory exists
+          ansible.builtin.file:
+            path: "{{ ssl_cert_dir }}"
+            state: directory
+            mode: '0755'
+          become: true
+          notify: Restart web service
+
+        - name: Copy web configuration files to the remote host
+          ansible.builtin.copy:
+            src: "{{ item.src }}"
+            dest: "{{ item.dest }}"
+            owner: root
+            group: root
+            mode: '0644'
+          with_items: "{{ web_config_files }}"
+          become: true
+          notify: Restart web service
+
+      rescue:
+        - name: Debug task for failed config changes
+          ansible.builtin.debug:
+            msg: "One or more of the configuration changes failed, but the web service is still active."
+
+      notify:
+        - Restart web service
+
+    # Configure the firewall
+    - name: Configure firewalld to allow HTTP and HTTPS connections
+      ansible.builtin.firewalld:
+        service: "{{ item }}"
+        permanent: true
+        state: enabled
+        immediate: yes  # Apply the change immediately
+      with_items:
+        - http
+        - https
+      become: true
+      notify: Restart web service
+
+  # Handlers
+  handlers:
+    - name: Restart web service
+      ansible.builtin.systemd:
+        name: "{{ web_service }}"
+        state: restarted
+        enabled: true

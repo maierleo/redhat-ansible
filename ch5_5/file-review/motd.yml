@@ -1,0 +1,42 @@
+---
+- name: Deploy MOTD and configure system files
+  hosts: all
+  gather_facts: yes
+  remote_user: maierl1
+
+  tasks:
+    - name: Deploy the MOTD template
+      ansible.builtin.template:
+        src: /home/student/file-review/templates/motd.j2
+        dest: /etc/motd
+        owner: maierl1
+        group: wheel
+        mode: '0644'
+
+    - name: Verify if /etc/motd exists
+      ansible.builtin.stat:
+        path: /etc/motd
+      register: motd_stat
+
+    - name: Display /etc/motd file stat
+      ansible.builtin.debug:
+        msg: "File /etc/motd exists: {{ motd_stat.stat.exists }}"
+
+    - name: Copy issue file to /etc/
+      ansible.builtin.copy:
+        src: /home/student/file-review/files/issue
+        dest: /etc/issue
+        owner: maierl1
+        group: wheel
+        mode: '0644'
+       
+    - name: Ensure /etc/issue.net is absent before creating symlink
+      ansible.builtin.file:
+        path: /etc/issue.net
+        state: absent  
+
+    - name: Create the symbolic link for /etc/issue.net
+      ansible.builtin.file:
+        path: /etc/issue.net
+        state: link
+        src: /etc/issue

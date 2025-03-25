@@ -1,0 +1,51 @@
+---
+- name: Preparing servers
+  hosts: servers
+  tasks:
+  - name: Fetch /var/log/secure
+    ansible.builtin.fetch:
+      src: /var/log/secure
+      dest: secure-backups
+
+  - name: Ensure /home/decops/files directory exists
+    ansible.builtin.file:
+      path: /home/devops/files
+      state: directory
+      owner: devops
+      group: devops
+      mode: 0775
+      setype: _default
+
+
+  - name: Add line of text
+    ansible.builtin.lineinfile:
+      path: /home/devops/files/users.txt
+      line: This line was added by the lineinfile module
+      state: present
+      create: true
+      owner: devops
+      group: devops
+      mode: 0664
+
+  - name: Copy system file to /home/devops/files
+    ansible.builtin.copy:
+      src: system
+      dest: /home/devops/files/
+      owner: devops
+      group: devops
+      mode: "0664"
+
+  - name: Append block
+    ansible.builtin.blockinfile:
+      path: /home/devops/files/users.txt
+      block: |
+        This block of text has two lines
+        Added with blockinfile module
+      state: present
+
+  - name: Extra task
+    ansible.builtin.lineinfile:
+      path: /home/devops/files/users.txt
+      line: "leo wor do"
+      insertafter: "This block of text has two lines." 
+      state: present

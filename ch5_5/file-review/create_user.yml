@@ -1,0 +1,26 @@
+---
+- name: Create a user and set up basic configuration
+  hosts: all
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Create user 'maierl1'
+      ansible.builtin.user:
+        name: maierl1
+        state: present
+        shell: /bin/bash
+        create_home: yes  
+        comment: "User maierl1 created"
+        group: root
+
+    - name: Ensure the home directory for maierl1 is correct
+      ansible.builtin.file:
+        path: "/home/maierl1"
+        owner: maierl1
+        group: maierl1
+        mode: '0755'
+
+    - name: Display the user details
+      ansible.builtin.debug:
+        msg: "User maierl1 has been created with home directory /home/maierl1"

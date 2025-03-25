@@ -1,0 +1,8 @@
+---
+- name: removedir playbook
+  hosts: servers
+  tasks: 
+    - name: Remove directory from host
+      ansible.builtin.file:
+        path: /home/devops/files
+        state: absent
